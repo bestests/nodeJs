@@ -1,0 +1,14 @@
+{
+  "name": "nodeJs",
+  "homepage": "https://github.com/bestests/nodeJs",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

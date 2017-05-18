@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <style>
+         .serviceObj {
+            width: 400px;
+            color: blue;
+            text-align: center;
+         }
+
+         #chatObj {
+            width: 400px;
+            height: 600px;
+            border: 1px solid black;
+         }
+
+         #contentInput {
+            width: 400px;
+         }
+      </style>
+      <script src="/js/jquery.min.js"></script>
+      <script src="/socket.io/socket.io.js"></script>
+      <script>
+         var socket = io.connect('http://dev.local.co.kr:2222');
+
+         var idx = 0;
+         var id  = "";
+
+         socket.on('on', function (data) {
+
+            idx = data.idx;
+
+            var nowDate = new Date();
+
+            var nowDateStr = nowDate.getFullYear() + "/" + (nowDate.getMonth() + 1) + "/" + nowDate.getDate() + " " + nowDate.getHours() + ":" + nowDate.getMinutes() + ":" + nowDate.getSeconds();
+
+            socket.emit('connect event', { connectDate : nowDateStr });
+         });
+
+         socket.on('totalCnt change', function (data) {
+            $("#totalCnt").text(data.cnt);
+         });
+
+         socket.on('check Id result', function (data) {
+            var result = data.result;
+
+            if(result) {
+               $("#duplChk").text("");
+               console.log(result);
+               $("#nextBtn").removeAttr("disabled");
+            } else {
+               $("#duplChk").text("");
+               $("#duplChk").text("Cannot use it");
+               $("#nextBtn").attr("disabled", true);
+            }
+         });
+
+         socket.on("service message", function (data) {
+            $("#chatObj").append($("<p>").addClass("serviceObj").text(data.message));
+         });
+
+         socket.on("chaged Id", function (data) {
+            id = data.id;
+         });
+
+         socket.on("input message", function (data) {
+            $("#inputMessage").text(data.msg);
+
+            setTimeout(function () {
+               $("#inputMessage").text("");
+            }, 5000);
+         });
+
+         socket.on("text message", function (data) {
+            console.dir(data);
+            $("#contentInput").append($("<p>").text(data.msg + " : " + data.id));
+         });
+
+         (function ($) {
+            $(function () {
+               $("#idInput").keyup(function (e) {
+                  var thisId = $(this).val();
+
+                  if(thisId.length > 3) {
+                     socket.emit("check Id", { newId: thisId });
+                  } else {
+                     $("#nextBtn").attr("disabled", true);
+                  }
+               });
+
+               $("#nextBtn").click(function (e) {
+                  console.log("click button");
+                  socket.emit("change Id", { idx: idx, id: $("#idInput").val() });
+                  $("#contentInput").removeAttr("disabled");
+                  return false;
+               });
+
+               $("#contentInput").keyup(function (e) {
+                  var thisVal = $(this).val();
+
+                  if(thisVal) {
+                     if(e.which === 13) {
+                        socket.emit("enter text", {idx: idx, id: id, msg: thisVal});
+                     } else {
+                        socket.emit("input text", {id: id});
+                     }
+                  }
+               });
+            });
+         })(jQuery)
+      </script>
+   </head>
+   <body>
+      <h1>CHAT</h1>
+      <h3>Total : <span id="totalCnt"></span></h3>
+      <input type="text" id="idInput" />&nbsp;&nbsp;<button type="button" id="nextBtn" disabled>Next</button>&nbsp;&nbsp;<span id="duplChk"></span>
+      <br />
+      <br />
+      <div id="chatObj"></div>
+      <br />
+      <input type="text" id="contentInput" disabled />
+      <div id="inputMessage"></div>
+   </body>
+</html>
