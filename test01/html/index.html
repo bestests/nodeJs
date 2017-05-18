@@ -46,7 +46,6 @@
 
             if(result) {
                $("#duplChk").text("");
-               console.log(result);
                $("#nextBtn").removeAttr("disabled");
             } else {
                $("#duplChk").text("");
@@ -68,12 +67,11 @@
 
             setTimeout(function () {
                $("#inputMessage").text("");
-            }, 5000);
+            }, 1000);
          });
 
          socket.on("text message", function (data) {
-            console.dir(data);
-            $("#contentInput").append($("<p>").text(data.msg + " : " + data.id));
+            $("#chatObj").append($("<p>").addClass("othersChat").text(data.id + " : " + data.msg));
          });
 
          (function ($) {
@@ -89,7 +87,6 @@
                });
 
                $("#nextBtn").click(function (e) {
-                  console.log("click button");
                   socket.emit("change Id", { idx: idx, id: $("#idInput").val() });
                   $("#contentInput").removeAttr("disabled");
                   return false;
@@ -101,6 +98,8 @@
                   if(thisVal) {
                      if(e.which === 13) {
                         socket.emit("enter text", {idx: idx, id: id, msg: thisVal});
+                        $("#contentInput").val("");
+                        $("#chatObj").append($("<p>").addClass("mineChat").text("me : " + thisVal));
                      } else {
                         socket.emit("input text", {id: id});
                      }

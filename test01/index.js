@@ -28,6 +28,9 @@ io.on('connection', function (socket) {
    socket.userObj[idx].id  = idx;
    socket.idx              = idx;
 
+   console.log("=====connect=====");
+   console.log(socket.userObj[idx]);
+   console.log("=====connect=====");
    idx++;
    cnt++;
 
@@ -36,7 +39,7 @@ io.on('connection', function (socket) {
    });
 
    socket.on('check Id', function (data) {
-      console.log(socket.userObj);
+      
       var result = true;
       for(var i = 0 ; i < socket.userObj.length ; i++) {
 
@@ -55,14 +58,11 @@ io.on('connection', function (socket) {
    });
 
    socket.on('change Id', function (data) {
-      console.log("call change Id");
       var idx  = data.idx;
       var id   = data.id;
       var exId = socket.userObj[idx].id;
 
       socket.userObj[idx].id = id;
-
-      console.log(socket.userObj[idx]);
 
       io.emit('service message', { message: "'" + exId  + "' -> '" + id + "' Changed ID" });
       socket.emit('chaged Id', {idx: idx, id: id});
@@ -83,8 +83,11 @@ io.on('connection', function (socket) {
       io.emit('service message', { message: leftId + " has left." });
       io.emit('totalCnt change', { cnt: cnt });
 
-      socket.userObj.splice(leftIdx, 1);
+      socket.userObj[leftIdx] = null;
 
-      console.log("disconnect");
+      console.log("=====disconnect=====");
+      console.log("leftIdx : " + leftIdx + ", leftId : " + leftId);
+      console.log("now use cnt : " + cnt);
+      console.log("=====disconnect=====");
    });
 });
